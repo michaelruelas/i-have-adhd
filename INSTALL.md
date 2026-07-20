@@ -1,98 +1,65 @@
 # Install i-have-adhd
 
-A Claude Code plugin. One skill inside.
+An OpenCode plugin. One skill file + one plugin file.
 
 ## TL;DR
 
-### Claude Code
-
 ```bash
-git clone https://github.com/ayghri/i-have-adhd ./i-have-adhd
-claude plugin marketplace add ./i-have-adhd
-claude plugin install i-have-adhd@i-have-adhd
+git clone https://github.com/michaelruelas/i-have-adhd
+cd i-have-adhd
+
+mkdir -p ~/.config/opencode/plugins ~/.config/opencode/skills
+
+ln -sf "$(pwd)/.opencode/plugins/i-have-adhd.ts" ~/.config/opencode/plugins/i-have-adhd.ts
+ln -sf "$(pwd)/skills/i-have-adhd" ~/.config/opencode/skills/i-have-adhd
 ```
 
-Open Claude Code, type `/i-have-adhd`.
+Restart OpenCode. Rules apply to every chat.
 
-To disable: `claude plugin disable i-have-adhd` (or `/plugin disable i-have-adhd` from within Claude Code). Re-enable later with `enable` instead of `disable`.
+## What gets installed
 
-### Codex
-
-```bash
-codex plugin marketplace add ayghri/i-have-adhd --ref main
-codex plugin add i-have-adhd@i-have-adhd
-```
-
-In Codex, type `$i-have-adhd` to request the output style explicitly.
+| Path | Role |
+|------|------|
+| `~/.config/opencode/plugins/i-have-adhd.ts` | Injects rules via `experimental.chat.system.transform` |
+| `~/.config/opencode/skills/i-have-adhd/SKILL.md` | Source of truth for the rules |
 
 ## Verify
 
-### Claude Code
-
 ```bash
-claude plugin list
+ls -la ~/.config/opencode/plugins/i-have-adhd.ts
+ls -la ~/.config/opencode/skills/i-have-adhd/SKILL.md
 ```
 
-Look for `i-have-adhd  (enabled)`.
-
-### Codex
-
-```bash
-codex plugin list
-```
-
-Look for `i-have-adhd` in the configured `i-have-adhd` marketplace.
+Both should resolve. Then restart OpenCode and send any message — answers should lead with an action.
 
 ## Update
 
-### Claude Code
-
 ```bash
-cd ./i-have-adhd && git pull
+cd /path/to/i-have-adhd && git pull
 ```
 
-The marketplace re-reads the local checkout. Next Claude Code session picks up changes.
-
-### Codex
-
-```bash
-codex plugin marketplace upgrade i-have-adhd
-codex plugin remove i-have-adhd
-codex plugin add i-have-adhd@i-have-adhd
-```
+Symlinks pick up changes. Restart OpenCode.
 
 ## Uninstall
 
-### Claude Code
+```bash
+rm ~/.config/opencode/plugins/i-have-adhd.ts
+rm ~/.config/opencode/skills/i-have-adhd
+```
+
+## Copy instead of symlink
 
 ```bash
-claude plugin uninstall i-have-adhd
-claude plugin marketplace remove i-have-adhd
+cp .opencode/plugins/i-have-adhd.ts ~/.config/opencode/plugins/i-have-adhd.ts
+cp -R skills/i-have-adhd ~/.config/opencode/skills/i-have-adhd
 ```
 
-### Codex
-
-```bash
-codex plugin remove i-have-adhd
-codex plugin marketplace remove i-have-adhd
-```
-
-## Always-on (optional)
-
-To skip `/i-have-adhd` and apply the rules from message one, add to `~/.claude/CLAUDE.md`:
-
-```markdown
-## Output style
-
-Always follow the rules in the `i-have-adhd` skill: action-first, numbered steps, no preamble, no closers, state restated each turn.
-```
+Updates require re-copying.
 
 ## Troubleshooting
 
-**`/i-have-adhd` not in autocomplete.** Restart Claude Code. The plugin index is read at startup.
+**Plugin loads but style does not change.** Restart OpenCode. Plugins are read at startup.
 
-**`claude plugin marketplace add` fails.** Point at the repo root, not at `.claude-plugin/`. The path must contain `.claude-plugin/marketplace.json`.
+**`[i-have-adhd] SKILL.md not found`.** The skill path is missing. Re-run the `ln -sf` skill line above.
 
-**Skill activates but model still preambles.** Open a new session. Old context may carry. If it still drifts, tighten the rule wording in `skills/i-have-adhd/SKILL.md`, then re-invoke.
-
-**Want different rules.** Edit `skills/i-have-adhd/SKILL.md`. Re-invoke `/i-have-adhd` (or restart) and the new rules apply.
+**Want different rules.** Edit `skills/i-have-adhd/SKILL.md`. Restart OpenCode.
